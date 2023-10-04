@@ -87,11 +87,9 @@ void checkPt(Point &pt, std::vector<int> listIDs){
     if (std::find(listIDs.begin(), listIDs.end(), pt.ID) != listIDs.end()) {
         pt.missingCounter = 0;
         pt.missing = false;
-        return true;
     } else {
         pt.missing = true;
         pt.missingCounter++;
-        return false;
     }
 }
 
@@ -200,7 +198,6 @@ int main()
                 }
                 }
             }
+    return 0;
         }
 
-    return 0;
-}
