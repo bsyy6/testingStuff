@@ -87,11 +87,9 @@ void checkPt(Point &pt, std::vector<int> listIDs){
     if (std::find(listIDs.begin(), listIDs.end(), pt.ID) != listIDs.end()) {
         pt.missingCounter = 0;
         pt.missing = false;
-        return true;
     } else {
         pt.missing = true;
         pt.missingCounter++;
-        return false;
     }
 }
 
@@ -120,87 +118,77 @@ double temp;
 int main()
 {
         
-       for(int i =0; i <5; i++){
-            Marker mrkr;
-            mrkr.ID = i+1;
-            mrkr.pos = i+10; // make sure thy are really far away from each other
-            markers.markers.push_back(mrkr);
-            markers.nMarkers++;
-        }
+    for(int i =0; i <5; i++){
+        Marker mrkr;
+        mrkr.ID = i+1;
+        mrkr.pos = i+10; // make sure thy are really far away from each other
+        markers.markers.push_back(mrkr);
+        markers.nMarkers++;
+    }
 
-        
+    
 
-        // make 2 fake Points
-        for (int i = 0; i < 2; i++) {
-            makePoint(markers.markers[i].pos, markers.markers[i].ID);
-        }
+    // make 2 fake Points
+    for (int i = 0; i < 2; i++) {
+        makePoint(markers.markers[i].pos, markers.markers[i].ID);
+    }
             
-        for (int rounds = 0; rounds <10; rounds++){
+    for (int rounds = 0; rounds <10; rounds++){
             markers.markers[0].pos++;
-            if (rounds  == 5){
+            if (rounds  == 5)
             //delete markers.markers[0];
-            markers.markers[4].ID = 99;
-            temp = markers.markers[0].pos+0.005-1;
             markers.markers.erase(markers.markers.begin());
+        markers.nMarkers = markers.markers.size();
+        std::vector<int> markerIDs;
+        std::vector<int> pointIDs;
+        for (int i = 0; i < Points.size(); i++) {
+            pointIDs.push_back(Points[i].ID);
+        }
+        for (int i = 0; i < markers.nMarkers; i++) {
+            markerIDs.push_back(markers.markers[i].ID);
+        }
+        // check if the point exists in the list of markers
+        for (int i = 0; i < Points.size(); i++) {
+            for (int j = 0; j < markers.nMarkers; j++) {
+                updatePointPos(Points[i], markers.markers[j]);  
             }
-            if (rounds  == 9){
-                // add it back on step 9
-                markers.markers[3].ID = 1;
-                markers.markers[3].pos = temp;
-            }
+            checkPt(Points[i], markerIDs);
+            // not found in the list of markers!
+            if(Points[i].missing){
+                estimate(Points[i]);
+                if(markers.nMarkers >= numberOfMarkersToTrack){
+                    // find the closest marker to be this point
+                    double minDist = 0.01; // within 1 cm
+                    int minIndex = 0;
+                    // make sure it doesn't inlcude markers already in the list
+                    for (int j = 0; j < markers.nMarkers; j++) {
 
-            markers.nMarkers = markers.markers.size();
-            std::vector<int> markerIDs;
-            std::vector<int> pointIDs;
-            for (int i = 0; i < Points.size(); i++) {
-                pointIDs.push_back(Points[i].ID);
-            }
-            for (int i = 0; i < markers.nMarkers; i++) {
-                markerIDs.push_back(markers.markers[i].ID);
-            }
-            // check if the point exists in the list of markers
-            for (int i = 0; i < Points.size(); i++) {
-                for (int j = 0; j < markers.nMarkers; j++) {
-                    updatePointPos(Points[i], markers.markers[j]);  
-                }
-                checkPt(Points[i], markerIDs);
-                // not found in the list of markers!
-                if(Points[i].missing){
-                    estimate(Points[i]);
-                    if(markers.nMarkers >= numberOfMarkersToTrack){
-                        // find the closest marker to be this point
-                        double minDist = 0.01; // within 1 cm
-                        int minIndex = 0;
-                        // make sure it doesn't inlcude markers already in the list
-                        for (int j = 0; j < markers.nMarkers; j++) {
-
-                            if(markers.markers[j].ID == Points[i].ID){
-                                updatePointPos(Points[i], markers.markers[j]);
-                                Points[i].prevID = 0; // set it to zero so it can be updated
-                                continue;
-                            }
-                            
-                            if(std::find(pointIDs.begin(), pointIDs.end(), markers.markers[j].ID) != pointIDs.end()){
-                                continue;
-                            }
-
-                            double dist = distPoints(markers.markers[j].pos, Points[i].lastSeen); 
-                            if (dist < minDist) {
-                                minDist = dist;
-                                minIndex = j;
-                            }
+                        if(markers.markers[j].ID == Points[i].ID){
+                            // if the marker is found, update the point.
+                            updatePointPos(Points[i], markers.markers[j]);
+                            continue;
                         }
-                        // update the point with the new ID
-                        if(minDist < 0.01){
-                            updatePoint(Points[i], markers.markers[minIndex]);
-                        }else{
-                            std::cout<<"No marker found for point: "<< Points[i].ID << "-" << minDist <<std::endl;
+                        
+                        if(std::find(pointIDs.begin(), pointIDs.end(), markers.markers[j].ID) != pointIDs.end()){
+                            // if the maker is already in the list, skip it.
+                            continue;
+                        }
+
+                        double dist = distPoints(markers.markers[j].pos, Points[i].lastSeen); 
+                        if (dist < minDist) {
+                            minDist = dist;
+                            minIndex = j;
                         }
                     }
-                }
+                    // update the point with the new ID
+                    if(minDist < 0.01){
+                        updatePoint(Points[i], markers.markers[minIndex]);
+                    }else{
+                    std::cout<<"No marker found for point: "<< Points[i].ID << "-" << minDist <<std::endl;
+                    }
                 }
             }
         }
-
+    }
     return 0;
 }
