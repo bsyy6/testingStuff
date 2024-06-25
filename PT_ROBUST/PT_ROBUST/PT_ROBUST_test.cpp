@@ -8,13 +8,14 @@ class PointTest : public ::testing::Test {
 
     public:
 
-    Markers markers; 
+    Markers markers;
+    
 
     PointTest(){}  
     ~PointTest(){}
 
     void SetUp() override{
-        
+        markers.nMarkers = 0; 
         // Set up the markers and points for the test
         for (int i = 0; i < 5; i++) {
             Marker mrkr;
@@ -44,7 +45,11 @@ TEST_F(PointTest, MarkersAreCreatedCorrectly) {
     }
 }
 
-int main(int argc, char **argv) {
-    ::testing::InitGoogleTest(&argc, argv);
-    return RUN_ALL_TESTS();
+
+TEST_F(PointTest, MakersHaveCorrectIDandPos){
+     for (int i = 0; i < 5; i++) {
+        PTR::Point p = PTR::makePoint(markers.markers[i]);
+        EXPECT_EQ(p.ID, markers.markers[i].ID);
+    }
 }
+

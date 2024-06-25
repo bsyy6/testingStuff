@@ -16,15 +16,6 @@ namespace PTR{
     }
 }
 
-// double subPoints (double p1, double p2){
-//     // returns p1 - p2    
-//     return p1-p2;
-// }
-// double addPoints (double p1, double p2){
-//     // returns p1 + p2
-//     return p1+p2;
-// }
-
 
 // void updatePointPos(Point &pt, Marker mrkr) {
 //     // chceks if the ID is the same
