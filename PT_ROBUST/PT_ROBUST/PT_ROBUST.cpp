@@ -2,33 +2,105 @@
 
 
 namespace PTR{
+
     Point makePoint(Marker mrkr){
             Point p;
             p.pos = mrkr.pos;
             p.missingCounter = 0;
-            
             p.estimated = false;
-
             p.ID = mrkr.ID;
-            p.prevID = 0;
-            
+            p.prevIDs.push_back(p.ID);
             return(p);
     }
+
+
+    void updatePointPos(Point &pt, const Marker& mrkr) {
+        if (pt.ID == mrkr.ID) {
+            pt.prevPos = pt.pos;
+            pt.pos = mrkr.pos;
+            pt.dpos = pt.pos - pt.prevPos;
+            if (std::abs(pt.dpos) < 0.001) pt.dpos = 0;
+            pt.missingCounter = 0;
+            pt.missing = false;
+            pt.estimated = false;
+        }
+    }
+
+    void updatePoints(Points& points, const Markers& markers){    
+        for (auto& point: points.points){
+            bool found = false;
+            for (const auto& marker: markers.markers){
+                if (marker.ID == point.ID){
+                    updatePointPos(point,marker);
+                    found = true;
+                    break; // go to next point
+                }
+            }
+            if(!found){
+                point.missing = true;
+                if(!findClosePoint(point,points,markers)){
+                    estimatePoint(point);
+                    point.missingCounter++;
+                }
+            }
+        }
+    }
+
+    void estimatePoint(Point& pt){
+        if(pt.missingCounter < 10){
+            pt.estimated = true;
+            pt.prevPos = pt.pos;
+            pt.pos += pt.dpos;
+        }
+        else{
+            // point not found anymore and I lost hope :(
+
+        }
+    }
+
+    bool findClosePoint(Point &pt, const Points &points,const Markers& markers){
+        // find if new marker ID is close to the previous point position, assign it to that.
+        // returns false when it fails.
+        int closestMarkerId = NULL;
+        bool foundCloseMarker = false;
+        float closestMarkerDist =100;
+        int maximumDistance = 0.01; // 1 cm seems close enogh to me.
+        
+        for (const auto& marker : markers.markers){
+            bool markerIsAlreadyAssigned = false;
+            for(const auto& point: points.points){
+                if(point.ID == marker.ID){
+                    markerIsAlreadyAssigned = true;
+                }
+                break;
+            }
+            if(!markerIsAlreadyAssigned){
+                float distToPoint = std::abs(marker.pos - pt.pos);
+                if( distToPoint< maximumDistance
+                    && distToPoint < closestMarkerDist
+                   ){
+                        closestMarkerDist = distToPoint;
+                        closestMarkerId = marker.ID;
+                   }
+            }
+        }
+        if(foundCloseMarker){
+            pt.prevIDs.push_back(pt.ID);
+            pt.ID = closestMarkerId;
+            pt.estimated = true;
+            pt.missing = false;
+        }
+        
+        return(foundCloseMarker);
+
+        
+    };
+
+
+
+
+
 }
-
-
-// void updatePointPos(Point &pt, Marker mrkr) {
-//     // chceks if the ID is the same
-//     if (pt.ID == mrkr.ID) {
-//         pt.prevPos = pt.pos;
-//         pt.pos = mrkr.pos;
-//         pt.dpos = subPoints(pt.pos, pt.prevPos);
-//         pt.missing = false;
-//     }
-//     // resets missing flag in case it was set
-    
-// }
-
 
 
 // void updatePoint(Point &pt, Marker mrkr) {
@@ -39,16 +111,7 @@ namespace PTR{
 // }
 
 
-// void checkPt(Point &pt, std::vector<int> listIDs){
-//     // check if the PointID exists in the listIDs
-//     if (std::find(listIDs.begin(), listIDs.end(), pt.ID) != listIDs.end()) {
-//         pt.missingCounter = 0;
-//         pt.missing = false;
-//     } else {
-//         pt.missing = true;
-//         pt.missingCounter++;
-//     }
-// }
+
 
 // double distPoints(double p1, double p2){
 //     //retunrs the distance between two points in 3D
