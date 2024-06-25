@@ -1,83 +1,86 @@
 #include "PT_ROBUST.h"
 
-double subPoints (double p1, double p2){
-    // returns p1 - p2    
-    return p1-p2;
-}
-double addPoints (double p1, double p2){
-    // returns p1 + p2
-    return p1+p2;
+
+namespace PTR{
+    Point makePoint(Marker mrkr){
+            Point p;
+            p.pos = mrkr.pos;
+            p.missingCounter = 0;
+            
+            p.estimated = false;
+
+            p.ID = mrkr.ID;
+            p.prevID = 0;
+            
+            return(p);
+    }
 }
 
+// double subPoints (double p1, double p2){
+//     // returns p1 - p2    
+//     return p1-p2;
+// }
+// double addPoints (double p1, double p2){
+//     // returns p1 + p2
+//     return p1+p2;
+// }
 
-Point makePoint(double pos,double id) {
-    Point p;
-    p.pos = pos;
-    p.missingCounter = 0;
+
+// void updatePointPos(Point &pt, Marker mrkr) {
+//     // chceks if the ID is the same
+//     if (pt.ID == mrkr.ID) {
+//         pt.prevPos = pt.pos;
+//         pt.pos = mrkr.pos;
+//         pt.dpos = subPoints(pt.pos, pt.prevPos);
+//         pt.missing = false;
+//     }
+//     // resets missing flag in case it was set
     
-    p.estimated = false;
-
-    p.ID = id;
-    p.prevID = 0;
-    
-   return(p);
-}
-
-void updatePointPos(Point &pt, Marker mrkr) {
-    // chceks if the ID is the same
-    if (pt.ID == mrkr.ID) {
-        pt.prevPos = pt.pos;
-        pt.pos = mrkr.pos;
-        pt.dpos = subPoints(pt.pos, pt.prevPos);
-        pt.missing = false;
-    }
-    // resets missing flag in case it was set
-    
-}
+// }
 
 
 
-void updatePoint(Point &pt, Marker mrkr) {
-    pt.prevID = pt.ID;
-    pt.ID = mrkr.ID; // now we updated the ID, we can update the position
-    updatePointPos(pt, mrkr);
-    pt.estimated = false;
-}
+// void updatePoint(Point &pt, Marker mrkr) {
+//     pt.prevID = pt.ID;
+//     pt.ID = mrkr.ID; // now we updated the ID, we can update the position
+//     updatePointPos(pt, mrkr);
+//     pt.estimated = false;
+// }
 
 
-void checkPt(Point &pt, std::vector<int> listIDs){
-    // check if the PointID exists in the listIDs
-    if (std::find(listIDs.begin(), listIDs.end(), pt.ID) != listIDs.end()) {
-        pt.missingCounter = 0;
-        pt.missing = false;
-    } else {
-        pt.missing = true;
-        pt.missingCounter++;
-    }
-}
+// void checkPt(Point &pt, std::vector<int> listIDs){
+//     // check if the PointID exists in the listIDs
+//     if (std::find(listIDs.begin(), listIDs.end(), pt.ID) != listIDs.end()) {
+//         pt.missingCounter = 0;
+//         pt.missing = false;
+//     } else {
+//         pt.missing = true;
+//         pt.missingCounter++;
+//     }
+// }
 
-double distPoints(double p1, double p2){
-    //retunrs the distance between two points in 3D
-    return (abs(p1 - p2));
-}
+// double distPoints(double p1, double p2){
+//     //retunrs the distance between two points in 3D
+//     return (abs(p1 - p2));
+// }
 
-void estimate(Point &pt) {
-    if(!pt.estimated){
-        // first time claculate the speed
-        pt.dpos = subPoints(pt.pos, pt.prevPos);
-        pt.estimated = true; 
-        pt.lastSeen = pt.pos;
-    }
-    if (pt.missingCounter <= MAX_drop) {
-        // if both are missing keep the speed
-        pt.prevPos = pt.pos;
-        pt.pos = addPoints(pt.pos,pt.dpos);
-    }
-}
+// void estimate(Point &pt) {
+//     if(!pt.estimated){
+//         // first time claculate the speed
+//         pt.dpos = subPoints(pt.pos, pt.prevPos);
+//         pt.estimated = true; 
+//         pt.lastSeen = pt.pos;
+//     }
+//     if (pt.missingCounter <= MAX_drop) {
+//         // if both are missing keep the speed
+//         pt.prevPos = pt.pos;
+//         pt.pos = addPoints(pt.pos,pt.dpos);
+//     }
+// }
 
 
-int numberOfMarkersToTrack = 2;
-double temp; 
+// int numberOfMarkersToTrack = 2;
+// double temp; 
 // int main()
 // {
         

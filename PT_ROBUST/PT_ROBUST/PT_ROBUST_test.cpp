@@ -3,9 +3,18 @@
 #include <PT_ROBUST/PT_ROBUST.h>
 
 // Test fixture for the unit test
-class PointTest : public gtest::testing::Test {
-protected:
-    void SetUp() override {
+class PointTest : public ::testing::Test {
+    
+
+    public:
+
+    Markers markers; 
+
+    PointTest(){}  
+    ~PointTest(){}
+
+    void SetUp() override{
+        
         // Set up the markers and points for the test
         for (int i = 0; i < 5; i++) {
             Marker mrkr;
@@ -17,18 +26,25 @@ protected:
 
         // Make 2 fake Points
         for (int i = 0; i < 2; i++) {
-            makePoint(markers.markers[i].pos, markers.markers[i].ID);
+            PTR::Point P = PTR::makePoint(markers.markers[i]);
         }
     }
 
-    void TearDown() override {
+    void TearDown() override{
         // Clean up the points after the test
-        Points.clear();
+        // Points.clear();
     }
 };
 
+TEST_F(PointTest, MarkersAreCreatedCorrectly) {
+    ASSERT_EQ(markers.nMarkers, 5);
+    for (int i = 0; i < 5; i++) {
+        EXPECT_EQ(markers.markers[i].ID, i + 1);
+        EXPECT_EQ(markers.markers[i].pos, i + 10);
+    }
+}
 
-TEST(generalTest, canCallPT)
-{
-    GTEST_ASSERT_EQ("1",fizzbuzz::fizzbuzz(1));
+int main(int argc, char **argv) {
+    ::testing::InitGoogleTest(&argc, argv);
+    return RUN_ALL_TESTS();
 }
