@@ -174,21 +174,23 @@ int main()
                             continue;
                         }
 
-                        double dist = distPoints(markers.markers[j].pos, Points[i].lastSeen); 
-                        if (dist < minDist) {
-                            minDist = dist;
-                            minIndex = j;
+                            double dist = distPoints(markers.markers[j].pos, Points[i].lastSeen); 
+                            if (dist < minDist) {
+                                minDist = dist;
+                                minIndex = j;
+                            }
+                        }
+                        // update the point with the new ID
+                        if(minDist < 0.01){
+                            updatePoint(Points[i], markers.markers[minIndex]);
+                        }else{
+                            std::cout<<"No marker found for point: "<< Points[i].ID << "-" << minDist <<std::endl;
                         }
                     }
-                    // update the point with the new ID
-                    if(minDist < 0.01){
-                        updatePoint(Points[i], markers.markers[minIndex]);
-                    }else{
-                    std::cout<<"No marker found for point: "<< Points[i].ID << "-" << minDist <<std::endl;
-                    }
+                }
                 }
             }
         }
-    }
+
     return 0;
-}
+        }
