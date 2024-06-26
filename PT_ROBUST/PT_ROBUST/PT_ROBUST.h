@@ -3,6 +3,7 @@
 #include <vector>
 #include <algorithm>
 #include <iostream>
+#include "FFIFO/FFIFO.h"
 
 struct Marker {
     double pos;
@@ -20,11 +21,12 @@ namespace PTR{
         bool missing = false;
         bool estimated = false;
         double lastSeen;
-        double prevPos;
+        FFIFO<double,10> prevPos;
         double pos;
         double dpos;
         double ID;
-        std::vector<double> prevIDs;
+        FFIFO<double,5> prevIDs;
+        double goalPosition;
     };
     
     struct Points{
@@ -35,6 +37,7 @@ namespace PTR{
     Point makePoint(Marker mrkr); // track a marker as a point
     void updatePointPos(Point &pt, const Marker& mrkr); // update the point position
     void updatePoints(Points &points, const Markers& markers); // update all tracked points positions
+    void makePointPosfollowMarker(Point &pt);
 
     void estimatePoint(Point &pt); // estimate a point postition.
     bool findClosePoint(Point &pt, const Points &points,const Markers& markers); // find if new marker ID is close to the previous point position, assign it to that.
@@ -44,4 +47,4 @@ namespace PTR{
 
 
 // Markers markers; 
-// std::vector<Point> Points;WA
+// std::vector<Point> Points;

@@ -1,6 +1,6 @@
 add_library(PT_ROBUST PT_ROBUST.cpp)
 target_include_directories(PT_ROBUST PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/..)
-
+target_link_libraries(PT_ROBUST PRIVATE FFIFO)
 # BUILD_TESTING variable is created by include(CTest)
 # It is set to ON by default
 if (BUILD_TESTING)

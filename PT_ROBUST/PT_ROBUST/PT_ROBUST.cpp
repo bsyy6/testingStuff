@@ -1,6 +1,7 @@
 #include "PT_ROBUST.h"
 
 
+
 namespace PTR{
 
     Point makePoint(Marker mrkr){
@@ -16,25 +17,31 @@ namespace PTR{
 
     void updatePointPos(Point &pt, const Marker& mrkr) {
         if (pt.ID == mrkr.ID) {
-            pt.prevPos = pt.pos;
+            pt.prevPos.push_back(pt.pos);
             pt.pos = mrkr.pos;
-            pt.dpos = pt.pos - pt.prevPos;
+            pt.dpos = pt.pos - pt.prevPos.back();
             if (std::abs(pt.dpos) < 0.001) pt.dpos = 0;
-            pt.missingCounter = 0;
-            pt.missing = false;
-            pt.estimated = false;
         }
     }
 
-    void updatePoints(Points& points, const Markers& markers){    
+    void updatePoints(Points& points, const Markers& markers){ 
+     
         for (auto& point: points.points){
             bool found = false;
             for (const auto& marker: markers.markers){
-                if (marker.ID == point.ID){
-                    updatePointPos(point,marker);
+                if (marker.ID == point.ID ){
+                    if(!point.estimated){
+                        updatePointPos(point,marker);
+                    }else{
+                        point.goalPosition = marker.pos;
+                        makePointPosfollowMarker(point);
+                    }
+                    point.missingCounter = 0;
+                    point.missing = false;
                     found = true;
                     break; // go to next point
                 }
+
             }
             if(!found){
                 point.missing = true;
@@ -49,7 +56,7 @@ namespace PTR{
     void estimatePoint(Point& pt){
         if(pt.missingCounter < 10){
             pt.estimated = true;
-            pt.prevPos = pt.pos;
+            pt.prevPos.push_back(pt.pos);
             pt.pos += pt.dpos;
         }
         else{
@@ -64,39 +71,61 @@ namespace PTR{
         int closestMarkerId = NULL;
         bool foundCloseMarker = false;
         double closestMarkerDist =100;
-        int maximumDistance = 0.01; // 1 cm seems close enogh to me.
+        double maximumDistance = 0.01; // 1 cm seems close enogh to me.
         
         for (const auto& marker : markers.markers){
             bool markerIsAlreadyAssigned = false;
+            
             for(const auto& point: points.points){
                 if(point.ID == marker.ID){
                     markerIsAlreadyAssigned = true;
+                    break;
                 }
-                break;
             }
+
             if(!markerIsAlreadyAssigned){
                 double distToPoint = std::abs(marker.pos - pt.pos);
-                if( distToPoint< maximumDistance
-                    && distToPoint < closestMarkerDist
-                   ){
-                        closestMarkerDist = distToPoint;
-                        closestMarkerId = marker.ID;
-                   }
+                for(const auto& pos: pt.prevPos){
+                    // checks all the previous ppsitions too for the close contact with marker
+                    distToPoint = (marker.pos - pos) < distToPoint ? std::abs(marker.pos - pos):distToPoint;
+                }
+                if( distToPoint< maximumDistance && distToPoint < closestMarkerDist){
+                    closestMarkerDist = distToPoint;
+                    closestMarkerId = marker.ID;
+                    foundCloseMarker = true;
+                }
             }
         }
+
         if(foundCloseMarker){
             pt.prevIDs.push_back(pt.ID);
+            pt.goalPosition = markers.markers[closestMarkerId].pos;
             pt.ID = closestMarkerId;
             pt.estimated = true;
             pt.missing = false;
         }
         
         return(foundCloseMarker);
-
-        
     };
 
-    
+    // make the point go to marker gracefully, maximum speed is 0.2 mm/iteration, if marker is within 0.5 mm it will jump and match the marker position.
+    void makePointPosfollowMarker(Point &pt){
+        pt.prevPos.push_back(pt.pos);
+
+        double maxSpeed = 0.2;
+        pt.dpos = std::abs(pt.pos - pt.goalPosition);
+        if(pt.dpos < 0.5){
+            pt.pos = pt.goalPosition;
+            pt.estimated = false; // no more esitmating
+        }else{  
+            pt.dpos = std::min(pt.dpos , maxSpeed);
+            pt.dpos = pt.pos < pt.goalPosition ? pt.dpos : -pt.dpos;
+            pt.pos =  pt.pos + pt.dpos;
+        }
+        pt.dpos = pt.pos - pt.prevPos.back();
+        if (std::abs(pt.dpos) < 0.001) pt.dpos = 0;
+    }
+
 }
 
 
