@@ -2,6 +2,7 @@
 #define FFIFO_H
 
 #include <vector>
+#include <cstddef>
 /*
 FFIFO: [F]ixed_size [F]irst [I]n [F]irst [O]ut 
 template class that inherits from std::vector
@@ -10,17 +11,18 @@ When the maximum size is reached, it removes
 the oldest element before adding a new one.
 warning:
 filling starts from end:
-FFIFO<int,4> fifo; // [0,0,0,0]
-fifo.push_back(1); // [0,0,0,1]
+FFIFO<int,4> fifo; // [Nan,Nan,Nan,Nan]
+fifo.push_back(1); // [1,Nan,Nan,Nan]
 fifo.push_back(99); // [0,0,1,99]
 */
 
 template <typename T, size_t MaxLen>
 class FFIFO : public std::vector<T> {
     public:
-        FFIFO() : std::vector<T>(MaxLen, static_cast<T>(0)) {
-            // initilize to 0
-        } 
+        FFIFO() : std::vector<T>() {
+            // block memory
+            this->reserve(MaxLen);
+        }
     
         void push_back(const T& value){
             if (this->size() == MaxLen) {
