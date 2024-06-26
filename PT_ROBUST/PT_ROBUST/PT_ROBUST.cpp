@@ -63,7 +63,7 @@ namespace PTR{
         // returns false when it fails.
         int closestMarkerId = NULL;
         bool foundCloseMarker = false;
-        float closestMarkerDist =100;
+        double closestMarkerDist =100;
         int maximumDistance = 0.01; // 1 cm seems close enogh to me.
         
         for (const auto& marker : markers.markers){
@@ -75,7 +75,7 @@ namespace PTR{
                 break;
             }
             if(!markerIsAlreadyAssigned){
-                float distToPoint = std::abs(marker.pos - pt.pos);
+                double distToPoint = std::abs(marker.pos - pt.pos);
                 if( distToPoint< maximumDistance
                     && distToPoint < closestMarkerDist
                    ){
@@ -96,10 +96,7 @@ namespace PTR{
         
     };
 
-
-
-
-
+    
 }
 
 

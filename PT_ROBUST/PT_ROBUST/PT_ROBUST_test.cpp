@@ -129,6 +129,7 @@ TEST_F(PointTest, UpdatePoints_missingMarkerComesBack){
     // bring back missing marker
     missingMarker.pos +=1; //13 real
     markers.markers.push_back(missingMarker);
+    markers.nMarkers++;
     PTR::updatePoints(points,markers);
     EXPECT_FALSE(points.points[0].estimated);
     EXPECT_FALSE(points.points[0].missing);
@@ -163,12 +164,15 @@ TEST_F(PointTest, UpdatePoints_closeMarkerIsFound){
     EXPECT_DOUBLE_EQ(points.points[1].pos - points.points[1].prevPos,0);
     std::cout <<"->" << points.points[0].pos; //14 estimated
     // bring back missing marker
-    missingMarker.pos +=1; //13 real
+    missingMarker.pos +=0.005; //13 real
+    missingMarker.ID = 99;
     markers.markers.push_back(missingMarker);
+    markers.nMarkers++;
     PTR::updatePoints(points,markers);
     EXPECT_FALSE(points.points[0].estimated);
     EXPECT_FALSE(points.points[0].missing);
     EXPECT_EQ(points.points[0].pos, 13);
+    EXPECT_EQ(points.points[0].ID, 99);
     EXPECT_DOUBLE_EQ(points.points[1].pos - points.points[1].prevPos,0);
     std::cout <<"->"<< points.points[0].pos <<std::endl;   
 }
