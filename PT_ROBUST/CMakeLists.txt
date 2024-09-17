@@ -1,2 +1,3 @@
 add_subdirectory(PT_ROBUST)
 add_subdirectory(FFIFO)
+add_subdirectory(MA_estimator)

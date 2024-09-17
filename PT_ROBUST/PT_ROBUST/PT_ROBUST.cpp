@@ -1,7 +1,6 @@
 #include "PT_ROBUST.h"
 
 
-
 namespace PTR{
 
     Point makePoint(Marker mrkr){
@@ -21,6 +20,7 @@ namespace PTR{
             pt.pos = mrkr.pos;
             pt.dpos = pt.pos - pt.prevPos.back();
             if (std::abs(pt.dpos) < 0.001) pt.dpos = 0;
+
         }
     }
 
@@ -57,7 +57,7 @@ namespace PTR{
         if(pt.missingCounter < 10){
             pt.estimated = true;
             pt.prevPos.push_back(pt.pos);
-            pt.pos += pt.dpos;
+            //pt.pos += pt.dpos;
         }
         else{
             // point not found anymore and I lost hope :(

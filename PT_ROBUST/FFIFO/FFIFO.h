@@ -11,9 +11,12 @@ When the maximum size is reached, it removes
 the oldest element before adding a new one.
 warning:
 filling starts from end:
-FFIFO<int,4> fifo; // [Nan,Nan,Nan,Nan]
-fifo.push_back(1); // [1,Nan,Nan,Nan]
-fifo.push_back(99); // [0,0,1,99]
+FFIFO<int,4> fifo; // [ND,ND,ND,ND]
+fifo.push_back(1); // [1,ND,ND,ND]
+fifo.push_back(99); // [1,99,ND,ND]
+fifo.push_back(3); // [1,99,3,ND]
+fifo.push_back(4); // [1,99,3,4]
+fifo.push_back(5); // [99,3,4,5]
 */
 
 template <typename T, size_t MaxLen>

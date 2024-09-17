@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <iostream>
 #include "FFIFO/FFIFO.h"
+#include "MA_estimator/MA.h"
 
 struct Marker {
     double pos;
@@ -27,6 +28,9 @@ namespace PTR{
         double ID;
         FFIFO<double,5> prevIDs;
         double goalPosition;
+        MA maX{60};
+        MA maY{60};
+        
     };
     
     struct Points{
